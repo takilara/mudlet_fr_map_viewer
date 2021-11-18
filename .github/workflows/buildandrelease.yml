@@ -55,6 +55,7 @@ jobs:
         run: |
           python update_versions.py --update_version --version ${{ steps.get_version2.outputs.version }}
       - name: Commit version files back to repo
+        run: |
           git add versions.*
           git commit -m "[ci] Updated Versions" &> /dev/null 
           git push origin main

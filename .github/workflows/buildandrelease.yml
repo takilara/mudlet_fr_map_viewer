@@ -51,6 +51,13 @@ jobs:
         id: get_version2
         run: echo ::set-output name=version::${GITHUB_REF#refs/*/}
 
+      - name: Update version files
+        run: |
+          python update_versions.py --update_version --version ${{ steps.get_version2.outputs.version }}
+          git add versions.*
+          git commit -m "[ci] Updated Versions" &> /dev/null 
+          git push
+
       - name: Make zip file
         id: build_zip2
         run: |

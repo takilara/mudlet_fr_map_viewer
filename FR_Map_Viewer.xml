@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MudletPackage>
+<MudletPackage version="1.001">
+	<TriggerPackage />
+	<TimerPackage />
+	<AliasPackage />
+	<ActionPackage />
+	<ScriptPackage>
+		<ScriptGroup isActive="yes" isFolder="yes">
+			<name>FR_Map_Viewer</name>
+			<packageName></packageName>
+			<script></script>
+			<eventHandlerList />
+			<Script isActive="yes" isFolder="no">
+				<name>mainscript</name>
+				<packageName></packageName>
+				<script>MapViewer = MapViewer or {}
+
+MapViewer.Handlers = MapViewer.Handlers or {}
+
+MapViewer.ModuleName = "FR_Map_Viewer"
+MapViewer.Version = "0.0.0"
+
+MapViewer.highlightedRoom = MapViewer.highlightedRoom or 0
+
+function MapViewer:onGmcp(roomObj)
+  --cecho("goto room\n")
+  --display(roomObj)
+  
+  local roomId=roomObj["Info"]["num"]
+  --print(roomId)
+  centerview(roomId)
+  --MapViewer:highlightRoom(roomId)
+  
+  local notes = getRoomUserData(roomId,"Notes")
+  if notes~="" then
+    MapViewer:show_notes(roomId)
+  end
+end
+
+function MapViewer:load_json_map()
+  -- load from JSON map
+  local path = getModuleFolder(MapViewer.ModuleName) .. "/map.json"
+  loadJsonMap(path)
+  saveMap()
+end
+
+function MapViewer:highlightRoom(id)
+  -- Not implemented yet
+  unHighlightRoom(MapViewer.highlightedRoom)
+  highlightRoom(id,0,0,255,0,255,0,2,0,255)
+  MapViewer.highlightedRoom = id
+end
+
+
+function MapViewer:renderExitObj(obj)
+
+  local str = "\t&lt;cyan&gt;'" .. obj.Dir .. "' leads to '" .. obj.Name .. "'(" .. obj.RoomId.. ") in '" .. obj.Area .. "'\n"
+  return str
+
+end
+
+function MapViewer:show_notes(roomId)
+  local notesBlob = getRoomUserData(roomId,"Notes")
+  if notesBlob~="" then
+    local notes = yajl.to_value(notesBlob)
+  
+    cecho("&lt;cyan&gt;Notes:")
+    print()
+    for i,v in ipairs(notes) do
+      cecho("&lt;cyan&gt;" .. i .. ":\t" .. v)
+      print()
+    end
+  else
+    cecho("&lt;cyan&gt;There are no notes for this room.")
+    print()
+  end
+end
+
+function MapViewer:showExits(id)
+  cecho("&lt;cyan&gt;Exits in room '" .. getRoomName(id) .. "' (" .. id .. ")")
+  print()
+  cecho("&lt;cyan&gt;Mapped Exits:")
+  print()
+  local rName =""
+  local rArea = ""
+  local exitObj = {}
+  for k,v in pairs(getRoomExits(id)) do
+    exitObj["Dir"] = k
+    exitObj["RoomId"] = v
+    exitObj["Name"] = getRoomName(v)
+    exitObj["Area"] = getRoomAreaName(getRoomArea(v))
+    cecho(m:renderExitObj(exitObj))
+  end
+  for k,v in pairs(getSpecialExitsSwap(id)) do
+    exitObj["Dir"] = k
+    exitObj["RoomId"] = v
+    exitObj["Name"] = getRoomName(v)
+    exitObj["Area"] = getRoomAreaName(getRoomArea(v))
+    cecho(m:renderExitObj(exitObj))
+  end
+  cecho("&lt;orange&gt;Unmapped:")
+  print()
+  if getExitStubs1(id)~=nil then
+    for k,v in ipairs(getExitStubs1(id)) do
+      cecho("\t&lt;orange&gt;" .. k .. ":\t" .. v)
+      print()
+    end
+  end
+end
+
+openMapWidget()
+
+
+
+
+
+</script>
+				<eventHandlerList />
+			</Script>
+			<Script isActive="yes" isFolder="no">
+				<name>onGmcpRoom</name>
+				<packageName></packageName>
+				<script>-- Capture the gmcp.Room event. Trigger the viewer
+function onGmcpRoom()
+  local roomObj = gmcp.Room
+  MapViewer:onGmcp(roomObj)
+end
+</script>
+				<eventHandlerList>
+					<string>gmcp.Room</string>
+				</eventHandlerList>
+			</Script>
+			<Script isActive="yes" isFolder="no">
+				<name>_util</name>
+				<packageName></packageName>
+				<script>function getModuleFolder(module_name)
+  local p = getModulePath(module_name)
+  local pp = string.split(p,"/")
+  table.remove(pp)
+  local ppp = table.concat(pp,"/")
+  return ppp
+end</script>
+				<eventHandlerList />
+			</Script>
+		</ScriptGroup>
+	</ScriptPackage>
+	<KeyPackage />
+	<HelpPackage>
+		<helpURL></helpURL>
+	</HelpPackage>
+</MudletPackage>

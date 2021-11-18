@@ -12,6 +12,23 @@
 			<script></script>
 			<eventHandlerList />
 			<Script isActive="yes" isFolder="no">
+				<name>_util</name>
+				<packageName></packageName>
+				<script>function getModuleFolder(module_name)
+  print("find module path")
+  if getModulePath(module_name)~=nil then
+    local p = getModulePath(module_name)
+    local pp = string.split(p,"/")
+    table.remove(pp)
+    local ppp = table.concat(pp,"/")
+    return ppp
+  else
+    return nil
+  end
+end</script>
+				<eventHandlerList />
+			</Script>
+			<Script isActive="yes" isFolder="no">
 				<name>mainscript</name>
 				<packageName></packageName>
 				<script>MapViewer = MapViewer or {}
@@ -22,10 +39,12 @@ MapViewer.ModuleName = "FR_Map_Viewer"
 MapViewer.Version = "0.0.0"
 
 MapViewer.highlightedRoom = MapViewer.highlightedRoom or 0
+MapViewer.CurrentRoomObj = MapViewer.CurrentRoomObj or nil
 
 function MapViewer:onGmcp(roomObj)
   --cecho("goto room\n")
   --display(roomObj)
+  MapViewer.CurrentRoomObj = roomObj
   
   local roomId=roomObj["Info"]["num"]
   --print(roomId)
@@ -40,9 +59,28 @@ end
 
 function MapViewer:load_json_map()
   -- load from JSON map
-  local path = getModuleFolder(MapViewer.ModuleName) .. "/map.json"
+  local path = ""
+  path = MapViewer:getMapPath(MapViewer.ModuleName)
   loadJsonMap(path)
+  
+  --display(MapViewer.CurrentRoomObj)
+  if MapViewer.CurrentRoomObj ~=nil then
+    MapViewer:onGmcp(MapViewer.CurrentRoomObj)
+  end
+  
   saveMap()
+end
+
+function MapViewer:getMapPath()
+  local path = nil
+  if getModuleFolder(MapViewer.ModuleName)==nil then
+  -- package
+    path = getMudletHomeDir().."/"..MapViewer.ModuleName.."/map.json"
+  else
+  -- module 
+    path = getModuleFolder(MapViewer.ModuleName) .. "/map.json"
+  end
+  return path
 end
 
 function MapViewer:highlightRoom(id)
@@ -130,18 +168,6 @@ end
 				<eventHandlerList>
 					<string>gmcp.Room</string>
 				</eventHandlerList>
-			</Script>
-			<Script isActive="yes" isFolder="no">
-				<name>_util</name>
-				<packageName></packageName>
-				<script>function getModuleFolder(module_name)
-  local p = getModulePath(module_name)
-  local pp = string.split(p,"/")
-  table.remove(pp)
-  local ppp = table.concat(pp,"/")
-  return ppp
-end</script>
-				<eventHandlerList />
 			</Script>
 		</ScriptGroup>
 	</ScriptPackage>

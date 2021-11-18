@@ -56,6 +56,8 @@ jobs:
           python update_versions.py --update_version --version ${{ steps.get_version2.outputs.version }}
       - name: Commit version files back to repo
         run: |
+          git config user.email "bot@onomato.biz"
+          git config user.name "Github Actions Bot"
           git add versions.*
           git commit -m "[ci] Updated Versions"
           git push origin main

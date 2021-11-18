@@ -57,7 +57,7 @@ jobs:
       - name: Commit version files back to repo
         run: |
           git add versions.*
-          git commit -m "[ci] Updated Versions" &> /dev/null 
+          git commit -m "[ci] Updated Versions"
           git push origin main
 
       - name: Make zip file

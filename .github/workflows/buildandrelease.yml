@@ -31,10 +31,10 @@ jobs:
           sed -i 's/MapViewer.Version = "0.0.0"/MapViewer.Version = "${{ steps.get_version1.outputs.version }}"/g' FR_Map_Viewer.xml
           zip --junk-paths build/FR_Map_Viewer.mpackage README.md FR_Map_Viewer.xml LICENSE config.lua map.json
 
-    - uses: actions/upload-artifact@v2
-      with:
-        name: FR_Map_Viewer.mpackage
-        path: build/FR_Map_Viewer.mpackage
+      - uses: actions/upload-artifact@v2
+        with:
+          name: FR_Map_Viewer.mpackage
+          path: build/FR_Map_Viewer.mpackage
       
 
       # if workflow was triggered due to a push, then that means we also got a v tag, and can create a release
